@@ -12,14 +12,11 @@ import static java.lang.Math.max;
 public class Bot {
 
     private static final int maxSpeed = 9;
-    private List<Command> directionList = new ArrayList<>();
 
     private Random random;
     private GameState gameState;
     private Car opponent;
     private Car myCar;
-    private int maxRound;
-    private int currentRound;
     private final static Command FIX = new FixCommand();
     private final static Command ACCELERATE = new AccelerateCommand();
     private final static Command LIZARD = new LizardCommand();
@@ -35,12 +32,6 @@ public class Bot {
         this.gameState = gameState;
         this.myCar = gameState.player;
         this.opponent = gameState.opponent;
-
-        // this.maxRound = gameState.maxRounds;
-        // this.currentRound = gameState.currentRound;
-
-        directionList.add(TURN_RIGHT);
-        directionList.add(TURN_LEFT);
     }
 
     public Command run() {
@@ -59,23 +50,23 @@ public class Bot {
             if (hasPowerUp(PowerUps.LIZARD, myCar.powerups)) {
                 return LIZARD;
             } else {
-                return chooseLane(myCar.position.lane, directionList);
+                return doTurn(myCar, gameState);
             }
         }
         if (blocks.contains(Terrain.WALL) || blocks.contains(Terrain.OIL_SPILL)) {
-            return chooseLane(myCar.position.lane, directionList);
+            return doTurn(myCar, gameState);
         }
-        if (hasPowerUp(PowerUps.BOOST, myCar.powerups)) {
+        if (hasPowerUp(PowerUps.BOOST, myCar.powerups) && !myCar.boosting) {
             return BOOST;
         }
-        if (hasPowerUp(PowerUps.EMP, myCar.powerups) && opponent.position.lane == myCar.position.lane && opponent.position.block >= myCar.position.block) {
+        if (hasPowerUp(PowerUps.EMP, myCar.powerups) && (opponent.position.lane == myCar.position.lane || opponent.position.lane == myCar.position.lane - 1 || opponent.position.lane == myCar.position.lane + 1) && opponent.position.block >= myCar.position.block) {
             return EMP;
         }
         if (myCar.damage >= 1) {
             return FIX;
        }
         if (myCar.speed > 8 && hasPowerUp(PowerUps.TWEET, myCar.powerups)) {
-            return new TweetCommand(opponent.position.lane, opponent.position.block + 10);
+            return new TweetCommand(opponent.position.lane, opponent.position.block + opponent.speed + 5);
         }
         if (myCar.speed > 8 && opponent.position.block < myCar.position.block && hasPowerUp(PowerUps.OIL, myCar.powerups)) {
             return OIL;
@@ -116,14 +107,61 @@ public class Bot {
         return blocks;
     }
 
-    private Command chooseLane(int lane, List<Command> directionList) {
-        if (lane == 1) {
-            return TURN_RIGHT;
-        } else if (lane == 4) {
-            return TURN_LEFT;
-        } else {
-            int i = random.nextInt(directionList.size());
-            return directionList.get(i);
+    private List<Object> getBlocksFrontRight(int lane, int block, GameState gameState) {
+        List<Lane[]> map = gameState.lanes;
+        List<Object> blocks = new ArrayList<>();
+        int startBlock = map.get(0)[0].position.block;
+
+        if(lane<=3){
+            Lane[] laneList = map.get(lane);
+            for (int i = max(block - startBlock, 0); i <= block - startBlock + Bot.maxSpeed; i++) {
+                if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
+                    break;
+                }
+
+                blocks.add(laneList[i].terrain);
+
+            }
         }
+        return blocks;
+    }
+
+    private List<Object> getBlocksFrontLeft(int lane, int block, GameState gameState) {
+        List<Lane[]> map = gameState.lanes;
+        List<Object> blocks = new ArrayList<>();
+        int startBlock = map.get(0)[0].position.block;
+
+        if(lane-2>=0){
+            Lane[] laneList = map.get(lane - 2);
+            for (int i = max(block - startBlock, 0); i <= block - startBlock + Bot.maxSpeed; i++) {
+                if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
+                    break;
+                }
+
+                blocks.add(laneList[i].terrain);
+
+            }
+        }
+        return blocks;
+    }
+
+    private Command doTurn(Car myCar, GameState gameState){
+        List<Object> blocksLeft = getBlocksFrontLeft(myCar.position.lane, myCar.position.block, gameState);
+        List<Object> blocksRight = getBlocksFrontRight(myCar.position.lane, myCar.position.block, gameState);
+        if(myCar.position.lane!=1 && !(blocksLeft.contains(Terrain.MUD) || blocksLeft.contains(Terrain.OIL_SPILL) || blocksLeft.contains(Terrain.WALL))){
+            return TURN_LEFT;
+        }
+        if(myCar.position.lane!=4 && !(blocksLeft.contains(Terrain.MUD) || blocksRight.contains(Terrain.OIL_SPILL) || blocksRight.contains(Terrain.WALL))){
+            return TURN_RIGHT;
+        }
+
+        if(myCar.position.lane!=1 && !blocksLeft.contains(Terrain.WALL)){
+            return TURN_LEFT;
+        }
+        if(myCar.position.lane!=4 && !blocksRight.contains(Terrain.WALL)){
+            return TURN_RIGHT;
+        }
+
+        return ACCELERATE;
     }
 }
