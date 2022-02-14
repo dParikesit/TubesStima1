@@ -45,7 +45,7 @@ public class Bot {
         List<Object> blocks = getBlocks(myCar.position.lane, myCar.position.block, gameState, myCar, "front");
 
         // Kalau damage >=2 difix karena terlalu lamban
-        if (myCar.damage >= 2) {
+        if (myCar.damage >= 2 && myCar.speed==maxSpeed) {
             return FIX;
         }
 
@@ -136,12 +136,9 @@ public class Bot {
         // Kalau kencang dan punya tweet dan syarat kita didepan musuh, dan tidak dijalur sama, pakai tweet
         if (myCar.speed > 8 && hasPowerUp(PowerUps.TWEET, myCar.powerups)) {
             if(!(opponent.position.lane == myCar.position.lane && opponent.position.block < myCar.position.block)) {
-                return new TweetCommand(opponent.position.lane, opponent.position.block + opponent.speed + 5); }
-        }
-
-        // Kalau sedang damai, fix saja
-        if (myCar.damage >= 1) {
-            return FIX;
+//                return new TweetCommand(opponent.position.lane, opponent.position.block + opponent.speed + 5);
+                return new TweetCommand(opponent.position.lane, opponent.position.block + opponent.speed);
+            }
         }
 
         // Taruh oil
@@ -188,16 +185,23 @@ public class Bot {
         List<Object> blocks = new ArrayList<>();
         int startBlock = map.get(0)[0].position.block;
 
-        Lane[] laneList = map.get(0);
-        if(direction.equals("front")){
-            laneList = map.get(lane - 1);
-        } else if(direction.equals("right")){
+        Lane[] laneList;
+
+        if(direction.equals("right")){
+            if(lane>3){
+                return blocks;
+            }
             laneList = map.get(lane);
         } else if(direction.equals("left")){
+            if(lane-2<0){
+                return blocks;
+            }
             laneList = map.get(lane - 2);
+        } else{
+            laneList = map.get(lane - 1);
         }
 
-        for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed +1; i++) {
+        for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed + 1; i++) {
             if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
                 break;
             }
