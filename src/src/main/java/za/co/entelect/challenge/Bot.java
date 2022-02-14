@@ -182,31 +182,19 @@ public class Bot {
         }
         return false;
     }
-
-    /**
-     * Returns map of blocks and the objects in the for the current lanes, returns
-     * the amount of blocks that can be traversed at max speed.
-     **/
+    
     private List<Object> getBlocksInFront(int lane, int block, GameState gameState, Car myCar) {
         List<Lane[]> map = gameState.lanes;
         List<Object> blocks = new ArrayList<>();
         int startBlock = map.get(0)[0].position.block;
 
         Lane[] laneList = map.get(lane - 1);
-        for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed; i++) {
+        for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed +1; i++) {
             if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
                 break;
             }
-
-            if(laneList[i].isOccupiedByCyberTruck) {
-                blocks.add(100);
-                continue;
-            } else {
-                blocks.add(laneList[i].terrain);
-            }
-
+            blocks.add(laneList[i].terrain);
         }
-
         return blocks;
     }
 
@@ -217,21 +205,13 @@ public class Bot {
 
         if(lane<=3){
             Lane[] laneList = map.get(lane);
-            for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed; i++) {
+            for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed + 1; i++) {
                 if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
                     break;
                 }
-
-                if(laneList[i].isOccupiedByCyberTruck) {
-                    blocks.add(100);
-                    continue;
-                } else {
-                    blocks.add(laneList[i].terrain);
-                }
+                blocks.add(laneList[i].terrain);
             }
         }
-
-
         return blocks;
     }
 
@@ -242,20 +222,13 @@ public class Bot {
 
         if(lane-2>=0){
             Lane[] laneList = map.get(lane - 2);
-            for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed; i++) {
+            for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed + 1; i++) {
                 if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
                     break;
                 }
-                if(laneList[i].isOccupiedByCyberTruck) {
-                    blocks.add(100);
-                    continue;
-                } else {
-                    blocks.add(laneList[i].terrain);
-                }
-
+                blocks.add(laneList[i].terrain);
             }
         }
-
         return blocks;
     }
 
@@ -296,7 +269,6 @@ public class Bot {
         List<Object> blocksFront = getBlocksInFront(myCar.position.lane, myCar.position.block, gameState, myCar);
         List<Object> blocksLeft = getBlocksFrontLeft(myCar.position.lane, myCar.position.block, gameState, myCar);
         List<Object> blocksRight = getBlocksFrontRight(myCar.position.lane, myCar.position.block, gameState, myCar);
-        List<Lane[]> map = gameState.lanes;
         Car opponent = gameState.opponent;
 
         boolean truckExists = checkTruck(myCar.position.lane, myCar.position.block, gameState, "front");
@@ -359,6 +331,11 @@ public class Bot {
         valueRight -= ((WallRight * (3)) + (MudRight * (1.5)) + (OilRight * (1.5)));
         valueFront -= ((WallFront * (3)) + (MudFront * (1.5)) + (OilFront * (1.5)));
 
+        return getNumber(valueFront, valueLeft, valueRight, WallLeft, WallRight, WallFront, myCar, BOOSTLeft, BOOSTRight, BOOSTFront);
+
+    }
+
+    private int getNumber(double valueFront, double valueLeft, double valueRight, int WallLeft, int WallRight, int WallFront, Car myCar, int BOOSTLeft, int BOOSTRight, int BOOSTFront) {
         if(myCar.position.lane == 1) {
             if(valueRight > valueFront) {
                 if(valueRight < 0) {
