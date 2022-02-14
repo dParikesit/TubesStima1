@@ -64,10 +64,10 @@ public class Bot {
         }
 
         if(hasPowerUp(PowerUps.TWEET, myCar.powerups)){
-            return new TweetCommand(opponent.position.lane, opponent.position.block+opponent.speed);
+            return sendTweet(opponent);
         }
 
-        if(hasPowerUp(PowerUps.EMP, myCar.powerups) && myCar.position.block < opponent.position.block &&inCone(myCar, opponent)){
+        if(hasPowerUp(PowerUps.EMP, myCar.powerups) && myCar.position.block < opponent.position.block &&  && inCone(myCar, opponent)){
             return EMP;
         }
 
@@ -107,6 +107,10 @@ public class Bot {
             default:
                 return 9;
         }
+    }
+
+    private Command sendTweet(Car opponent){
+        return new TweetCommand(opponent.position.lane, opponent.position.block+opponent.speed);
     }
 
     private boolean advantageous(Car myCar, GameState gameState, String direction, boolean truck){
@@ -217,7 +221,7 @@ public class Bot {
             laneList = map.get(lane - 1);
         }
 
-        for (int i = max(block - startBlock -5, 0); i <= min(block - startBlock + 20, 1500); i++) {
+        for (int i = max(block - startBlock, 0); i < min(block - startBlock + 20, 1500); i++) {
             if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
                 break;
             }
