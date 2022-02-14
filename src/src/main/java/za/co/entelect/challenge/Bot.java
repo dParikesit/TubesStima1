@@ -67,7 +67,7 @@ public class Bot {
             return sendTweet(opponent);
         }
 
-        if(hasPowerUp(PowerUps.EMP, myCar.powerups) && myCar.position.block < opponent.position.block &&  && inCone(myCar, opponent)){
+        if(hasPowerUp(PowerUps.EMP, myCar.powerups) && myCar.position.block < opponent.position.block && opponent.speed>6 && inCone(myCar, opponent)){
             return EMP;
         }
 
