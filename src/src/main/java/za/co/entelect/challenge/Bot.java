@@ -42,7 +42,7 @@ public class Bot {
         boolean truckLeft = checkTruck(myCar.position.lane, myCar.position.block, gameState, "left");
         boolean truckRight = checkTruck(myCar.position.lane, myCar.position.block, gameState, "right");
         //Basic fix logic
-        List<Object> blocks = getBlocksInFront(myCar.position.lane, myCar.position.block, gameState, myCar);
+        List<Object> blocks = getBlocks(myCar.position.lane, myCar.position.block, gameState, myCar, "front");
 
         if (myCar.damage >= 2) {
             return FIX;
@@ -104,7 +104,7 @@ public class Bot {
         } */
         if (blocks.contains(Terrain.MUD)) {
 
-                int result = doTurn(myCar, gameState);
+            int result = doTurn(myCar, gameState);
             if(result > 5) {
                 if(hasPowerUp(PowerUps.LIZARD, myCar.powerups)) {
                     return LIZARD;
@@ -112,11 +112,11 @@ public class Bot {
                     result -= 5;
                 }
             }
-                if(result == 1) {
-                    return TURN_RIGHT;
-                } else if (result == 2) {
-                    return TURN_LEFT;
-                }
+            if(result == 1) {
+                return TURN_RIGHT;
+            } else if (result == 2) {
+                return TURN_LEFT;
+            }
         }
         if (blocks.contains(Terrain.WALL) || blocks.contains(Terrain.OIL_SPILL)) {
             int result = doTurn(myCar, gameState);
@@ -182,52 +182,25 @@ public class Bot {
         }
         return false;
     }
-    
-    private List<Object> getBlocksInFront(int lane, int block, GameState gameState, Car myCar) {
+
+    private List<Object> getBlocks(int lane, int block, GameState gameState, Car myCar, String direction) {
         List<Lane[]> map = gameState.lanes;
         List<Object> blocks = new ArrayList<>();
         int startBlock = map.get(0)[0].position.block;
 
-        Lane[] laneList = map.get(lane - 1);
+        Lane[] laneList = map.get(0);
+        if(direction.equals("front")){
+            laneList = map.get(lane - 1);
+        } else if(direction.equals("right")){
+            laneList = map.get(lane);
+        } else if(direction.equals("left")){
+            laneList = map.get(lane - 2);
+        }
         for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed +1; i++) {
             if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
                 break;
             }
             blocks.add(laneList[i].terrain);
-        }
-        return blocks;
-    }
-
-    private List<Object> getBlocksFrontRight(int lane, int block, GameState gameState, Car myCar) {
-        List<Lane[]> map = gameState.lanes;
-        List<Object> blocks = new ArrayList<>();
-        int startBlock = map.get(0)[0].position.block;
-
-        if(lane<=3){
-            Lane[] laneList = map.get(lane);
-            for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed + 1; i++) {
-                if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
-                    break;
-                }
-                blocks.add(laneList[i].terrain);
-            }
-        }
-        return blocks;
-    }
-
-    private List<Object> getBlocksFrontLeft(int lane, int block, GameState gameState, Car myCar) {
-        List<Lane[]> map = gameState.lanes;
-        List<Object> blocks = new ArrayList<>();
-        int startBlock = map.get(0)[0].position.block;
-
-        if(lane-2>=0){
-            Lane[] laneList = map.get(lane - 2);
-            for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed + 1; i++) {
-                if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
-                    break;
-                }
-                blocks.add(laneList[i].terrain);
-            }
         }
         return blocks;
     }
@@ -266,9 +239,9 @@ public class Bot {
     }
 
     private int doTurn(Car myCar, GameState gameState){
-        List<Object> blocksFront = getBlocksInFront(myCar.position.lane, myCar.position.block, gameState, myCar);
-        List<Object> blocksLeft = getBlocksFrontLeft(myCar.position.lane, myCar.position.block, gameState, myCar);
-        List<Object> blocksRight = getBlocksFrontRight(myCar.position.lane, myCar.position.block, gameState, myCar);
+        List<Object> blocksFront = getBlocks(myCar.position.lane, myCar.position.block, gameState, myCar, "front");
+        List<Object> blocksLeft = getBlocks(myCar.position.lane, myCar.position.block, gameState, myCar, "left");
+        List<Object> blocksRight = getBlocks(myCar.position.lane, myCar.position.block, gameState, myCar, "right");
         Car opponent = gameState.opponent;
 
         boolean truckExists = checkTruck(myCar.position.lane, myCar.position.block, gameState, "front");
