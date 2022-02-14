@@ -99,26 +99,8 @@ public class Bot {
         if (myCar.speed <= 3) {
             return ACCELERATE;
         }
-/*        if (blocks.contains(Terrain.BOOST)) {
-            return ACCELERATE;
-        } */
-        if (blocks.contains(Terrain.MUD)) {
+        if (blocks.contains(Terrain.MUD) || blocks.contains(Terrain.WALL) || blocks.contains(Terrain.OIL_SPILL)) {
 
-            int result = doTurn(myCar, gameState);
-            if(result > 5) {
-                if(hasPowerUp(PowerUps.LIZARD, myCar.powerups)) {
-                    return LIZARD;
-                } else {
-                    result -= 5;
-                }
-            }
-            if(result == 1) {
-                return TURN_RIGHT;
-            } else if (result == 2) {
-                return TURN_LEFT;
-            }
-        }
-        if (blocks.contains(Terrain.WALL) || blocks.contains(Terrain.OIL_SPILL)) {
             int result = doTurn(myCar, gameState);
             if(result > 5) {
                 if(hasPowerUp(PowerUps.LIZARD, myCar.powerups)) {
