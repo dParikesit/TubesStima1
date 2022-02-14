@@ -44,10 +44,12 @@ public class Bot {
         //Basic fix logic
         List<Object> blocks = getBlocks(myCar.position.lane, myCar.position.block, gameState, myCar, "front");
 
+        // Kalau damage >=2 difix karena terlalu lamban
         if (myCar.damage >= 2) {
             return FIX;
         }
 
+        // Cek apakah ada truck, kalau ada hindari atau loncati pakai lizard
         if(truckExists || truckLeft || truckRight) {
             int result = doTurn(myCar, gameState);
             if(result > 5) {
@@ -64,6 +66,7 @@ public class Bot {
             }
         }
 
+        // Kalau kencang dan lane sebelah lebih hijau (ada powerup tanpa obstacle), pindah
         if(myCar.speed > 8) {
             int result = doTurn(myCar, gameState);
             if(result > 5) {
@@ -80,6 +83,7 @@ public class Bot {
             }
         }
 
+        // Kalau lamban dan didepan ada lumpur, hindari
         if(myCar.speed <= 3 && blocks.contains(Terrain.MUD)) {
             int result = doTurn(myCar, gameState);
             if(result > 5) {
@@ -96,9 +100,12 @@ public class Bot {
             }
         }
 
+        // Kalau terlalu lamban, dipercepat
         if (myCar.speed <= 3) {
             return ACCELERATE;
         }
+
+        // Kalau didepan ada obstacle, hindarin
         if (blocks.contains(Terrain.MUD) || blocks.contains(Terrain.WALL) || blocks.contains(Terrain.OIL_SPILL)) {
 
             int result = doTurn(myCar, gameState);
@@ -115,28 +122,37 @@ public class Bot {
                 return TURN_LEFT;
             }
         }
+
+        // Pakai EMP kalau kondisi oke
         if (hasPowerUp(PowerUps.EMP, myCar.powerups) && (opponent.position.lane == myCar.position.lane || opponent.position.lane == myCar.position.lane - 1 || opponent.position.lane == myCar.position.lane + 1) && opponent.position.block >= myCar.position.block) {
             return EMP;
         }
+
+        // Pakai boost kalau punya dan ga lagi boost
         if (hasPowerUp(PowerUps.BOOST, myCar.powerups) && !myCar.boosting) {
             return BOOST;
         }
+
+        // Kalau kencang dan punya tweet dan syarat kita didepan musuh, dan tidak dijalur sama, pakai tweet
         if (myCar.speed > 8 && hasPowerUp(PowerUps.TWEET, myCar.powerups)) {
             if(!(opponent.position.lane == myCar.position.lane && opponent.position.block < myCar.position.block)) {
                 return new TweetCommand(opponent.position.lane, opponent.position.block + opponent.speed + 5); }
         }
+
+        // Kalau sedang damai, fix saja
         if (myCar.damage >= 1) {
             return FIX;
         }
-        if (myCar.speed > 8 && opponent.position.block < myCar.position.block && hasPowerUp(PowerUps.OIL, myCar.powerups)) {
+
+        // Taruh oil
+        if (myCar.speed == 15 && opponent.position.block < myCar.position.block && hasPowerUp(PowerUps.OIL, myCar.powerups)) {
             return OIL;
         }
-        if (myCar.speed == 15 && hasPowerUp(PowerUps.EMP, myCar.powerups)) {
-            return EMP;
-        }
+
         return ACCELERATE;
     }
 
+    // Check max speed
     private int checkMax(Car myCar){
         switch (myCar.damage){
             case 0:
@@ -156,6 +172,7 @@ public class Bot {
         }
     }
 
+    // Check punya powerup tertentu
     private Boolean hasPowerUp(PowerUps powerUpToCheck, PowerUps[] available) {
         for (PowerUps powerUp: available) {
             if (powerUp.equals(powerUpToCheck)) {
@@ -165,6 +182,7 @@ public class Bot {
         return false;
     }
 
+    // Cek block di depan sesuai arah
     private List<Object> getBlocks(int lane, int block, GameState gameState, Car myCar, String direction) {
         List<Lane[]> map = gameState.lanes;
         List<Object> blocks = new ArrayList<>();
@@ -178,6 +196,7 @@ public class Bot {
         } else if(direction.equals("left")){
             laneList = map.get(lane - 2);
         }
+
         for (int i = max(block - startBlock, 0); i <= block - startBlock + myCar.speed +1; i++) {
             if (laneList[i] == null || laneList[i].terrain == Terrain.FINISH) {
                 break;
@@ -187,6 +206,7 @@ public class Bot {
         return blocks;
     }
 
+    // Cek apakah ada cybertruck di arah direction
     private boolean checkTruck(int lane, int block, GameState gameState, String direction) {
         List<Lane[]> map = gameState.lanes;
         int startBlock = map.get(0)[0].position.block;
@@ -220,7 +240,9 @@ public class Bot {
         return false;
     }
 
+    // Lakukan turn
     private int doTurn(Car myCar, GameState gameState){
+        // Melakukan pembobotan lane depan, kiri, kanan untuk mendapatkan arah terbaik saat ini
         List<Object> blocksFront = getBlocks(myCar.position.lane, myCar.position.block, gameState, myCar, "front");
         List<Object> blocksLeft = getBlocks(myCar.position.lane, myCar.position.block, gameState, myCar, "left");
         List<Object> blocksRight = getBlocks(myCar.position.lane, myCar.position.block, gameState, myCar, "right");
@@ -290,6 +312,15 @@ public class Bot {
 
     }
 
+    // Return angka berdasarkan pembobotan method doTurn
+    // Arti angka
+    // 1. Belok kanan
+    // 2. Belok kiri
+    // 3. Lurus terus
+    // 6. Jika punya lizard, pakai lizard. Jika tidak belok kanan
+    // 7. Sama seperti 6 tapi belok kiri
+    // 8. Sama seperti 6 tapi lurus
+    // 4 dan 5 tidak ada karena pembuat phobia angka 4 dan 5. Semoga dengan begini tidak sial
     private int getNumber(double valueFront, double valueLeft, double valueRight, int WallLeft, int WallRight, int WallFront, Car myCar, int BOOSTLeft, int BOOSTRight, int BOOSTFront) {
         if(myCar.position.lane == 1) {
             if(valueRight > valueFront) {
