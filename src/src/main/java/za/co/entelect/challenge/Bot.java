@@ -12,8 +12,6 @@ import static java.lang.Math.min;
 
 import java.security.SecureRandom;
 
-import java.util.Arrays;
-
 public class Bot {
 
     private static int maxSpeed = 9;
