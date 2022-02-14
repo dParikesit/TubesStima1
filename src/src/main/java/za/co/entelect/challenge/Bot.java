@@ -71,11 +71,11 @@ public class Bot {
             return EMP;
         }
 
-        if(hasPowerUp(PowerUps.BOOST, myCar.powerups) &&!(truckExists||nextBlocks.contains(Terrain.MUD) || nextBlocks.contains(Terrain.WALL) || nextBlocks.contains(Terrain.OIL_SPILL))){
+        if(hasPowerUp(PowerUps.BOOST, myCar.powerups) &&!(nextBlocks.contains(Terrain.MUD) || nextBlocks.contains(Terrain.WALL) || nextBlocks.contains(Terrain.OIL_SPILL))){
             return BOOST;
         }
 
-        if(hasPowerUp(PowerUps.OIL, myCar.powerups) && myCar.position.block>opponent.position.block && !(truckExists||nextBlocks.contains(Terrain.MUD) || nextBlocks.contains(Terrain.WALL) || nextBlocks.contains(Terrain.OIL_SPILL))){
+        if(hasPowerUp(PowerUps.OIL, myCar.powerups) && myCar.position.block>opponent.position.block && !(nextBlocks.contains(Terrain.MUD) || nextBlocks.contains(Terrain.WALL) || nextBlocks.contains(Terrain.OIL_SPILL))){
             return OIL;
         }
 
