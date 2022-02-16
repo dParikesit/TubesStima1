@@ -84,7 +84,7 @@ public class Bot {
         }
 
         // Kalau lamban dan didepan ada lumpur, hindari
-        if(myCar.speed <= 3 && blocks.contains(Terrain.MUD)) {
+        if(myCar.speed <= 3 && (blocks.contains(Terrain.MUD) || blocks.contains(Terrain.WALL) || blocks.contains(Terrain.OIL_SPILL))) {
             int result = doTurn(myCar, gameState);
             if(result > 5) {
                 if(hasPowerUp(PowerUps.LIZARD, myCar.powerups)) {
@@ -102,7 +102,11 @@ public class Bot {
 
         // Kalau terlalu lamban, dipercepat
         if (myCar.speed <= 3) {
-            return ACCELERATE;
+            if(hasPowerUp(PowerUps.BOOST, myCar.powerups) && myCar.damage == 0) {
+                return BOOST;
+            } else {
+                return ACCELERATE;
+            }
         }
 
         // Kalau didepan ada obstacle, hindarin
@@ -127,9 +131,11 @@ public class Bot {
         if (hasPowerUp(PowerUps.EMP, myCar.powerups) && (opponent.position.lane == myCar.position.lane || opponent.position.lane == myCar.position.lane - 1 || opponent.position.lane == myCar.position.lane + 1) && opponent.position.block >= myCar.position.block && myCar.speed > 6) {
             return EMP;
         }
-
+        if(myCar.speed == 9 && myCar.damage != 0) {
+            return FIX;
+        }
         // Pakai boost kalau punya dan ga lagi boost dan gak ada rintangan
-        if (hasPowerUp(PowerUps.BOOST, myCar.powerups) && !myCar.boosting && !(blocks.contains(Terrain.MUD) || blocks.contains(Terrain.WALL) || blocks.contains(Terrain.OIL_SPILL))) {
+        if (myCar.speed!= checkMax(myCar) && hasPowerUp(PowerUps.BOOST, myCar.powerups) && !myCar.boosting && !(blocks.contains(Terrain.MUD) || blocks.contains(Terrain.WALL) || blocks.contains(Terrain.OIL_SPILL))) {
             return BOOST;
         }
 
