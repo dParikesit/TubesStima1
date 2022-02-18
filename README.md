@@ -9,7 +9,7 @@ Merupakan implementasi bot mobil dalam permainan Overdrive dengan menggunakan st
 Overdrive adalah sebuah game yang mempertandingkan 2 bot mobil dalam sebuah ajang balapan. Setiap pemain akan memiliki sebuah bot mobil dan masing-masing bot akan saling bertanding untuk memenangkan pertandingan.
 
 ## Algoritma Greedy yang Diimplementasikan
-Strategi greedy yang kamu implementasikan adalah strategi yang berusaha untuk memaksimalkan kecepatan dan memilih jalur yang paling menguntungkan dalam arti mengandung obstacle seminimal mungkin atau memiliki powerups untuk diambil yang lebih menguntungkan. Pemilihan jalur ini dilakukan dengan metode pembobotan tiap jalur yang ada. Jika mobil telah berada pada jalur yang aman, mobil akan menggunakan powerups yang dimiliki dengan urutan prioritas yaitu EMP, Boost, Tweet, dan Oil.
+Strategi greedy yang kami implementasikan adalah strategi yang berusaha untuk memaksimalkan kecepatan dan memilih jalur yang paling menguntungkan dalam arti mengandung obstacle seminimal mungkin atau memiliki powerups untuk diambil yang lebih menguntungkan. Pemilihan jalur ini dilakukan dengan metode pembobotan tiap jalur yang ada. Jika mobil telah berada pada jalur yang aman, mobil akan menggunakan powerups yang dimiliki dengan urutan prioritas yaitu EMP, Boost, Tweet, dan Oil.
 
 ## Requirement
 * Java (minimal Java 8), dapat diunduh di https://www.oracle.com/java/technologies/downloads/#java8
